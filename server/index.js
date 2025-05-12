@@ -8,15 +8,13 @@ const port = process.env.PORT || 3000;
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(cors()); // Cho phép CORS từ mọi nguồn
 
 // Route xử lý request
 app.post('/track', (req, res) => {
-    // Lấy IP: Ưu tiên cf-connecting-ip, sau đó x-forwarded-for, cuối cùng remoteAddress
-    const clientIp = req.headers['cf-connecting-ip'] || 
-                     (req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0].trim() : null) || 
-                     req.socket.remoteAddress || 
-                     'Unknown IP';
+    // Lấy IP: Chỉ lấy IP đầu tiên từ x-forwarded-for
+    const forwarded = req.headers['x-forwarded-for'];
+    const clientIp = forwarded ? forwarded.split(',')[0].trim() : req.socket.remoteAddress || 'Unknown IP';
 
     // Lấy User-Agent
     const userAgent = req.headers['user-agent'] || 'Unknown device';
